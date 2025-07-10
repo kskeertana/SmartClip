@@ -1,4 +1,3 @@
-// App.jsx
 import React, { useEffect, useState } from "react";
 
 export default function App() {
@@ -9,20 +8,22 @@ export default function App() {
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { type: "GET_SELECTION" },
-        (response) => {
+      if (!tabs || !tabs.length) return;
+
+      chrome.scripting.executeScript(
+        {
+          target: { tabId: tabs[0].id },
+          func: () => window.getSelection().toString().trim(),
+        },
+        (results) => {
           if (chrome.runtime.lastError) {
-            console.error("❌ Error:", chrome.runtime.lastError.message);
+            console.error("❌ Scripting error:", chrome.runtime.lastError.message);
             return;
           }
-          if (response?.selectedText) {
-            console.log("📥 Popup received:", response.selectedText);
-            setSelectedText(response.selectedText);
-          } else {
-            console.warn("⚠️ No text selected.");
-          }
+
+          const selected = results?.[0]?.result || "";
+          console.log("📥 Selected via scripting:", selected);
+          setSelectedText(selected);
         }
       );
     });
