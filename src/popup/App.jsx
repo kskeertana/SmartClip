@@ -41,12 +41,19 @@ export default function App() {
     setLoading(false);
   };
 
-  const handleSave = () => {
+ const handleSave = () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (!tabs || !tabs.length) {
+      alert("❌ Could not get current tab.");
+      return;
+    }
+
+    const currentTab = tabs[0];
     const clip = {
       text: selectedText,
       note,
       summary,
-      url: window.location.href,
+      url: currentTab.url,       // ✅ This is the real URL!
       date: new Date().toLocaleString(),
     };
 
@@ -56,7 +63,10 @@ export default function App() {
 
     alert("📌 Clip Saved Successfully!");
     setNote("");
-  };
+  });
+};
+
+ 
 
   const openDashboard = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("dashboard.html") });
