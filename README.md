@@ -1,24 +1,22 @@
 
-
-
 # 🧠 SmartClip - AI-powered Chrome Web Clipper
 
 SmartClip is a Chrome Extension that allows users to:
 - Select and clip text from any website
-- Add personal notes to the selected text
-- Generate AI-based summaries using Cohere API
-- Save all clips securely in a MongoDB database
-- View, manage, and delete saved clips from a clean React-based dashboard
+- Add personal notes
+- Generate AI summaries using Cohere API
+- Save and manage clips via a MongoDB + Node.js backend
+- View saved clips in a clean React + Tailwind dashboard
 
 ---
 
 ## 📦 Features
 
-- Clip and save selected text from web pages
-- AI-generated summaries of clipped content
-- Add optional notes before saving
-- All data stored in MongoDB via a Node.js backend
-- View all clips in a Tailwind CSS styled dashboard
+- 🖱️ Clip text from webpages
+- 📝 Add optional notes
+- 🤖 AI-powered summarization (Cohere)
+- 💾 Save clips to MongoDB via Express backend
+- 📂 Manage clips in a responsive dashboard
 
 ---
 
@@ -40,7 +38,12 @@ cd backend
 npm install
 ```
 
-Create a `.env` file in the backend folder:
+#### 🔐 Get Your Cohere API Key
+
+1. Go to [https://dashboard.cohere.com](https://dashboard.cohere.com)
+2. Sign up or log in
+3. Copy your API key
+4. Create a `.env` file in the `backend/` folder:
 
 ```env
 COHERE_API_KEY=your_cohere_api_key
@@ -48,7 +51,7 @@ MONGO_URI=your_mongodb_connection_string
 PORT=5000
 ```
 
-Then run the server:
+#### Start the server:
 
 ```bash
 node server.js
@@ -58,15 +61,13 @@ node server.js
 
 ### 3. Setup Frontend (Chrome Extension)
 
-Go back to the root folder:
-
 ```bash
 cd ..
 npm install
 npm run build
 ```
 
-> This builds the Chrome Extension into the `dist/` folder.
+> This will generate a `dist/` folder for your extension.
 
 ---
 
@@ -76,22 +77,26 @@ npm run build
 2. Enable **Developer Mode**
 3. Click **Load Unpacked**
 4. Select the `dist/` folder
-5. The extension is now ready to use
+
+✅ You're ready to use SmartClip!
 
 ---
 
 ## 📂 Usage
 
-* Select text on any web page
-* Open the extension from the browser
-* Add an optional note
-* Click “🧠 Summarize” to generate an AI summary
-* Click “💾 Save Clip” to store the clip
-* Click “📂 View Saved Clips” to view all saved entries in a dashboard
+1. Select text on any webpage
+2. Open the extension
+3. Add a note (optional)
+4. Click **🧠 Summarize** to generate AI summary
+5. Click **💾 Save Clip** to store
+6. Click **📂 View Saved Clips** to open the dashboard
 
 ---
+
 ## 📜 License
 
 This project is licensed under the [MIT License](LICENSE).
+
+```
 
 
