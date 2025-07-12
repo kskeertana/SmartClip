@@ -7,11 +7,12 @@ function Dashboard() {
   const [showNote, setShowNote] = useState(null);
   const [showSummary, setShowSummary] = useState(null);
   const [expandedText, setExpandedText] = useState(null);
-
-  useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("webclips") || "[]");
-    setClips(stored);
-  }, []);
+useEffect(() => {
+  fetch("http://localhost:5000/api/clips")
+    .then((res) => res.json())
+    .then((data) => setClips(data))
+    .catch((err) => console.error("❌ Failed to fetch clips:", err));
+}, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white p-6">
@@ -20,11 +21,19 @@ function Dashboard() {
           🗂️ Web Clipper Dashboard
         </h1>
         <button
-  onClick={() => {
-    localStorage.removeItem("webclips");
-    setClips([]);
-    alert("✅ All clips deleted!");
-  }}
+onClick={() => {
+  fetch("http://localhost:5000/api/clips", { method: "DELETE" })
+    .then((res) => res.json())
+    .then(() => {
+      setClips([]);
+      alert("✅ All clips deleted!");
+    })
+    .catch((err) => {
+      console.error("❌ Error deleting clips:", err);
+      alert("❌ Failed to delete.");
+    });
+}}
+
   className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded shadow mt-4"
 >
   🗑️ Delete All Clips

@@ -5,6 +5,7 @@ export default function App() {
   const [note, setNote] = useState("");
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(false);
+const COHERE_API_KEY = import.meta.env.VITE_COHERE_API_KEY;
 
   useEffect(() => {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -29,20 +30,53 @@ export default function App() {
     });
   }, []);
 
-  const handleSummarize = async () => {
-    setLoading(true);
-    const response = await fetch("https://api.example.com/summarize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: selectedText }),
-    });
-    const data = await response.json();
-    setSummary(data.summary || "Could not summarize.");
-    setLoading(false);
-  };
+const handleSummarize = async () => {
+  if (!selectedText.trim()) {
+    alert("❌ No text selected to summarize.");
+    return;
+  }
 
- const handleSave = () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  setLoading(true);
+
+  try {
+    const res = await fetch("https://api.cohere.ai/v1/summarize", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${COHERE_API_KEY}`,
+ // Replace with real key
+      },
+      body: JSON.stringify({
+        text: selectedText,
+        length: "medium", // short | medium | long
+        format: "paragraph", // bulleted | paragraph
+        model: "command", // or command-nightly (latest)
+        extractiveness: "auto" // low | medium | high | auto
+      })
+    });
+
+    const data = await res.json();
+    console.log("🧠 Cohere summary:", data);
+
+    if (data.summary) {
+      setSummary(data.summary);
+    } else {
+      setSummary("No summary generated.");
+    }
+
+  } catch (error) {
+    console.error("❌ Cohere summarization error:", error);
+    alert("Failed to summarize using Cohere.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+const handleSave = async () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
     if (!tabs || !tabs.length) {
       alert("❌ Could not get current tab.");
       return;
@@ -53,20 +87,32 @@ export default function App() {
       text: selectedText,
       note,
       summary,
-      url: currentTab.url,       // ✅ This is the real URL!
+      url: currentTab.url,
       date: new Date().toLocaleString(),
     };
 
-    const existing = JSON.parse(localStorage.getItem("webclips") || "[]");
-    existing.push(clip);
-    localStorage.setItem("webclips", JSON.stringify(existing));
+    try {
+      const res = await fetch("http://localhost:5000/api/clips", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(clip),
+      });
 
-    alert("📌 Clip Saved Successfully!");
-    setNote("");
+      const data = await res.json();
+      if (res.ok) {
+        alert("📌 Clip Saved to MongoDB!");
+        setNote("");
+      } else {
+        alert("❌ Failed to save: " + data.error);
+      }
+    } catch (error) {
+      alert("❌ Error: " + error.message);
+    }
   });
 };
 
- 
 
   const openDashboard = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL("dashboard.html") });
