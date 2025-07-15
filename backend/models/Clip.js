@@ -5,7 +5,8 @@ const clipSchema = new mongoose.Schema({
   note: { type: String },
   summary: { type: String },
   url: { type: String },
-  date: { type: String }, // We'll store this as a formatted string (e.g. "July 8, 2025, 5:00 PM")
+  date: { type: String }, // e.g. "July 8, 2025, 5:00 PM"
+  pin: { type: Boolean, default: false } // ✅ Add this line
 });
 
 module.exports = mongoose.model("Clip", clipSchema);

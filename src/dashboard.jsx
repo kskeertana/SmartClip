@@ -1,138 +1,210 @@
 import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom/client";
-import "./index.css"; // Make sure your Tailwind styles are imported!
+import "./index.css";
 
 function Dashboard() {
   const [clips, setClips] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [showNote, setShowNote] = useState(null);
   const [showSummary, setShowSummary] = useState(null);
   const [expandedText, setExpandedText] = useState(null);
-useEffect(() => {
-  fetch("http://localhost:5000/api/clips")
-    .then((res) => res.json())
-    .then((data) => setClips(data))
-    .catch((err) => console.error("❌ Failed to fetch clips:", err));
-}, []);
+  const [loadingClipId, setLoadingClipId] = useState(null);
+  const [theme, setTheme] = useState("dark");
+
+  useEffect(() => {
+    document.body.className = theme;
+  }, [theme]);
+
+  useEffect(() => {
+    fetch("http://localhost:5000/api/clips")
+      .then((res) => res.json())
+      .then((data) => setClips(data))
+      .catch((err) => console.error("❌ Failed to fetch clips:", err));
+  }, []);
+
+  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+
+  const deleteClip = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this clip?")) return;
+    try {
+      await fetch(`http://localhost:5000/api/clips/${id}`, { method: "DELETE" });
+      setClips((prev) => prev.filter((clip) => clip._id !== id));
+    } catch (err) {
+      alert("❌ Failed to delete clip.");
+    }
+  };
+
+  const deleteAllClips = async () => {
+    if (!window.confirm("Are you sure you want to delete ALL clips?")) return;
+    try {
+      await fetch(`http://localhost:5000/api/clips`, { method: "DELETE" });
+      setClips([]);
+    } catch (err) {
+      alert("❌ Failed to delete all clips.");
+    }
+  };
+
+  const togglePin = async (id) => {
+    const res = await fetch(`http://localhost:5000/api/clips/${id}/pin`, { method: "PUT" });
+    const data = await res.json();
+    setClips((prev) => prev.map((c) => (c._id === id ? data.clip : c)));
+  };
+
+  const summarizeClip = async (clipId, text) => {
+    try {
+      setLoadingClipId(clipId);
+      const res = await fetch("https://api.cohere.ai/v1/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_COHERE_API_KEY}`,
+        },
+        body: JSON.stringify({
+          text,
+          length: "medium",
+          format: "paragraph",
+          model: "command",
+          extractiveness: "auto",
+        }),
+      });
+      const data = await res.json();
+      setClips((prev) =>
+        prev.map((c) => (c._id === clipId ? { ...c, summary: data.summary || "No summary." } : c))
+      );
+      setShowSummary(clipId);
+    } catch (err) {
+      alert("❌ Failed to summarize.");
+    } finally {
+      setLoadingClipId(null);
+    }
+  };
+
+  const sortedClips = [...clips]
+    .filter(
+      (clip) =>
+        clip.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        clip.url.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+    .sort((a, b) => b.pin - a.pin);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white p-6">
-      <div className="max-w-5xl mx-auto">
-        <h1 className="text-4xl font-extrabold text-center text-blue-700 mb-12 flex items-center justify-center gap-2">
-          🗂️ Web Clipper Dashboard
-        </h1>
-        <button
-onClick={() => {
-  fetch("http://localhost:5000/api/clips", { method: "DELETE" })
-    .then((res) => res.json())
-    .then(() => {
-      setClips([]);
-      alert("✅ All clips deleted!");
-    })
-    .catch((err) => {
-      console.error("❌ Error deleting clips:", err);
-      alert("❌ Failed to delete.");
-    });
-}}
+    <div className="dashboard">
+      <div className="container">
+        <header className="header">
+          <h1 className="title">📎 Web Clipper Dashboard</h1>
+          <div className="header-actions">
+            <input
+              type="text"
+              className="search-input"
+              placeholder="🔍 Search your saved clips..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button className="delete-all-btn" onClick={deleteAllClips}>
+              🗑️
+            </button>
+            <button className="toggle-mode-btn" onClick={toggleTheme}>
+              {theme === "dark" ? "🌞 Light Mode" : "🌙 Dark Mode"}
+            </button>
+          </div>
+        </header>
 
-  className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded shadow mt-4"
->
-  🗑️ Delete All Clips
-</button>
-
-
-        {clips.length === 0 ? (
-          <p className="text-center text-gray-500 text-lg">
-            No clips saved yet.
-          </p>
+        {sortedClips.length === 0 ? (
+          <p className="no-clips">No clips saved yet.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {clips.map((clip, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 p-4 flex flex-col gap-4"
-              >
-                {/* Header */}
-                <div className="flex justify-between items-center border-b pb-2">
-                  <a
-                    href={clip.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-700 font-medium text-sm underline truncate max-w-[75%]"
-                    title={clip.url}
-                  >
-                    🌐 {clip.url}
-                  </a>
-                  <span className="text-xs text-gray-400">{clip.date}</span>
-                </div>
+          <div className="clip-list">
+            {sortedClips.map((clip, index) => (
+              <div key={clip._id} className="clip-card">
+                <a
+                  href={`${clip.url}#clip=${encodeURIComponent(clip.text)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="view-page-btn"
+                >
+                  🌐 Open Saved Page
+                </a>
 
-                {/* Main Content */}
-                <div className="flex gap-4 items-start">
-                  {/* Left side: Selected Text */}
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium text-gray-600 mb-1">
-                      📌 Selected Text
-                    </h3>
-                    <div className="relative text-sm text-gray-800 bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-32 overflow-y-auto whitespace-pre-wrap">
-                      {expandedText === index ? (
-                        clip.text
-                      ) : (
-                        <>
-                          {clip.text?.slice(0, 300) || (
-                            <span className="text-gray-400">No text saved.</span>
-                          )}
-                          {clip.text && clip.text.length > 300 && (
-                            <span className="text-gray-400">... </span>
-                          )}
-                        </>
+                <div className="clip-content">
+                  <p className="clip-date">{clip.date}</p>
+
+                  <div className="clip-text">
+                    <h3 className="clip-text-title">📌 Selected Text</h3>
+                    <div className="clip-text-body">
+                      {expandedText === index
+                        ? clip.text
+                        : `${clip.text.slice(0, 300)}${clip.text.length > 300 ? "..." : ""}`}
+                      {clip.text.length > 300 && (
+                        <button
+                          onClick={() => setExpandedText(expandedText === index ? null : index)}
+                          className="show-more-btn"
+                        >
+                          {expandedText === index ? "Show Less" : "Show More"}
+                        </button>
                       )}
                     </div>
-                    {clip.text && clip.text.length > 300 && (
-                      <button
-                        onClick={() =>
-                          setExpandedText(expandedText === index ? null : index)
-                        }
-                        className="text-xs mt-1 text-blue-600 hover:underline"
-                      >
-                        {expandedText === index ? "Show Less" : "Show More"}
-                      </button>
-                    )}
                   </div>
 
-                  {/* Right side: Buttons */}
-                  <div className="flex flex-col gap-2">
-                    <button
-                      onClick={() =>
-                        setShowNote(showNote === index ? null : index)
-                      }
-                      className="text-xs px-4 py-2 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-800 font-medium border border-blue-200 transition"
-                    >
-                      📝 {showNote === index ? "Hide Note" : "View Note"}
-                    </button>
-                    <button
-                      onClick={() =>
-                        setShowSummary(showSummary === index ? null : index)
-                      }
-                      className="text-xs px-4 py-2 rounded-full bg-yellow-100 hover:bg-yellow-200 text-yellow-800 font-medium border border-yellow-200 transition"
-                    >
-                      🧠 {showSummary === index ? "Hide Summary" : "View Summary"}
-                    </button>
-                  </div>
+                  {showNote === index && (
+                    <div className="note-box">
+                      <strong>Note:</strong>{" "}
+                      {clip.note || <span className="faded">No note saved.</span>}
+                    </div>
+                  )}
+
+                  {showSummary === index && (
+                    <div className="summary-box">
+                      <strong>Summary:</strong>
+                      <div style={{ marginTop: "0.5rem", whiteSpace: "pre-wrap" }}>
+                        {clip.summary || <span className="faded">No summary available.</span>}
+                      </div>
+                      {clip.summary && (
+                        <button
+                          className="copy-btn"
+                          onClick={() => {
+                            navigator.clipboard.writeText(clip.summary);
+                            alert("✅ Summary copied!");
+                          }}
+                        >
+                          📋 Copy
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Note and Summary Sections */}
-                {showNote === index && (
-                  <div className="text-sm bg-blue-50 border border-blue-200 rounded-lg p-3 animate-fade-in">
-                    <strong>Note:</strong>{" "}
-                    {clip.note ? clip.note : <span className="text-gray-400">No note saved.</span>}
-                  </div>
-                )}
-
-                {showSummary === index && (
-                  <div className="text-sm bg-yellow-50 border border-yellow-200 rounded-lg p-3 animate-fade-in">
-                    <strong>Summary:</strong>{" "}
-                    {clip.summary ? clip.summary : <span className="text-gray-400">No summary available.</span>}
-                  </div>
-                )}
+                <div className="clip-actions">
+                  <button
+                    onClick={() => setShowNote(showNote === index ? null : index)}
+                    className="btn note-btn"
+                  >
+                    📝 View Note
+                  </button>
+                  <button
+                    onClick={() => setShowSummary(showSummary === index ? null : index)}
+                    className="btn summary-btn"
+                  >
+                    🧠 View Summary
+                  </button>
+                  <button
+                    onClick={() => summarizeClip(clip._id, clip.text)}
+                    className="btn summarize-btn"
+                    disabled={loadingClipId === clip._id}
+                  >
+                    {loadingClipId === clip._id ? "Summarizing..." : "⚡ Summarize"}
+                  </button>
+                  <button
+                    onClick={() => togglePin(clip._id)}
+                    className={`btn ${clip.pin ? "unpin-btn" : "pin-btn"}`}
+                  >
+                    {clip.pin ? "📌 Unpin" : "📍 Pin"}
+                  </button>
+                  <button
+                    onClick={() => deleteClip(clip._id)}
+                    className="btn delete-btn"
+                  >
+                    🗑️ Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

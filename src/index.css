@@ -1,8 +1,309 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ---------------- Base Styles ---------------- */
+body, html {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
+}
 
-body {
-  font-family: 'Inter', sans-serif;
-  background-color: #f9fafb;
+/* Light & Dark Themes */
+body.light {
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+body.dark {
+  background-color: #0f172a;
+  color: #f1f5f9;
+}
+
+/* ---------------- Links ---------------- */
+a {
+  color: #60a5fa;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- Layout ---------------- */
+.dashboard {
+  padding: 2rem 1.5rem;
+}
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ---------------- Header ---------------- */
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+}
+
+/* Header Buttons Row */
+.header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Search Input */
+.search-input {
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background-color: #1e293b;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+  width: 240px;
+}
+body.light .search-input {
+  background-color: #f1f5f9;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+.search-input::placeholder {
+  color: #94a3b8;
+}
+
+/* Delete All Button */
+.delete-all-btn {
+  background-color: #ef4444;
+  color: #f1f5f9;
+  padding: 0.6rem 0.9rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.delete-all-btn:hover {
+  background-color: #dc2626;
+  transform: translateY(-1px);
+}
+
+/* Toggle Mode Button */
+.toggle-mode-btn {
+  background-color: #3b82f6;
+  color: #f1f5f9;
+  padding: 0.6rem 0.9rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+}
+.toggle-mode-btn:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+}
+
+/* ---------------- Clip Card ---------------- */
+.clip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.clip-card {
+  background-color: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  padding: 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  transition: transform 0.15s ease;
+}
+.clip-card:hover {
+  transform: translateY(-2px);
+}
+body.light .clip-card {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ---------------- View Page Button ---------------- */
+.view-page-btn {
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.65rem 1rem;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.view-page-btn:hover {
+  background: linear-gradient(90deg, #2563eb, #3b82f6);
+  transform: scale(1.03);
+}
+
+/* ---------------- Clip Content ---------------- */
+.clip-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.clip-date {
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+body.light .clip-date {
+  color: #475569;
+}
+
+/* ---------------- Selected Text ---------------- */
+.clip-text-title {
+  font-weight: 600;
+  color: #f472b6;
+}
+.clip-text-body {
+  background-color: #334155;
+  padding: 0.85rem;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-height: 160px;
+  overflow-y: auto;
+}
+body.light .clip-text-body {
+  background-color: #e2e8f0;
+}
+
+/* ---------------- Note & Summary Boxes ---------------- */
+.note-box, .summary-box {
+  background-color: #475569;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  border-left: 4px solid #38bdf8;
+}
+body.light .note-box {
+  background-color: #dbeafe;
+  color: #1e293b;
+}
+.note-box strong {
+  color: #e0f2fe;
+}
+body.light .note-box strong {
+  color: #1e293b;
+}
+
+.summary-box {
+  background-color: #fef3c7;
+  color: #78350f;
+  border-left-color: #facc15;
+}
+.summary-box strong {
+  color: #92400e;
+}
+
+/* ---------------- Copy Button ---------------- */
+.copy-btn {
+  background-color: #1e40af;
+  color: white;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+}
+.copy-btn:hover {
+  background-color: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+/* ---------------- Action Buttons ---------------- */
+.clip-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+.btn {
+  padding: 0.55rem 0.9rem;
+  font-size: 0.98rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn:hover {
+  transform: translateY(-1px);
+}
+
+/* ---------------- Button Variants ---------------- */
+.note-btn {
+  background-color: #3b82f6;
+  color: #f1f5f9;
+}
+.note-btn:hover {
+  background-color: #2563eb;
+}
+
+.summary-btn {
+  background-color: #fbbf24;
+  color: #1f2937;
+}
+.summary-btn:hover {
+  background-color: #f59e0b;
+}
+
+.summarize-btn {
+  background-color: #a855f7;
+  color: #f1f5f9;
+}
+.summarize-btn:hover {
+  background-color: #9333ea;
+}
+
+.pin-btn {
+  background-color: #64748b;
+  color: #f1f5f9;
+}
+.pin-btn:hover {
+  background-color: #475569;
+}
+
+.unpin-btn {
+  background-color: #22c55e;
+  color: #f1f5f9;
+}
+.unpin-btn:hover {
+  background-color: #16a34a;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: #f1f5f9;
+}
+.delete-btn:hover {
+  background-color: #dc2626;
 }

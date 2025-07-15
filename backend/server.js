@@ -54,3 +54,26 @@ app.delete("/api/clips", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+// Toggle pin
+app.put("/api/clips/:id/pin", async (req, res) => {
+  try {
+    const clip = await Clip.findById(req.params.id);
+    if (!clip) return res.status(404).json({ error: "Clip not found" });
+
+    clip.pin = !clip.pin;
+    await clip.save();
+    res.json({ message: "Pin status toggled", clip });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to toggle pin" });
+  }
+});
+// Delete a clip by ID
+app.delete("/api/clips/:id", async (req, res) => {
+  try {
+    await Clip.findByIdAndDelete(req.params.id);
+    res.json({ message: "Clip deleted successfully." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete clip." });
+  }
+});

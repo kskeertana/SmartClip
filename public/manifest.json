@@ -3,8 +3,14 @@
   "name": "Web Clipper",
   "version": "1.0",
   "description": "Clip web content, summarize it, and save it with notes.",
-  "permissions": ["activeTab", "scripting", "storage"],
-  "host_permissions": ["<all_urls>"],
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
   "action": {
     "default_popup": "index.html",
     "default_icon": {
@@ -21,6 +27,12 @@
       "matches": ["<all_urls>"],
       "js": ["content.js"],
       "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["dashboard.html", "assets/*"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
