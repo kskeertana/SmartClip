@@ -90,6 +90,12 @@ npm run build
 4. Click **🧠 Summarize** to generate AI summary
 5. Click **💾 Save Clip** to store
 6. Click **📂 View Saved Clips** to open the dashboard
+   
+<img src="2.png" width="300" alt="SmartClip Popup" />
+
+<img src="1.png" width="700" alt="SmartClip Dashboard" />
+
+
 
 ---
 
